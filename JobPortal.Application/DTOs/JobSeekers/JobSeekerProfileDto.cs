@@ -34,6 +34,17 @@ namespace JobPortal.Application.DTOs.JobSeekers
 
         public string JobRole { get; set; }
 
+        // Mobile UI Registration Fields
+        public string? CurrentLocation { get; set; }
+        public string? EmploymentStatus { get; set; }
+        public int? NoticePeriod { get; set; }
+        public int? TotalExperienceYears { get; set; }
+        public int? TotalExperienceMonths { get; set; }
+        public int? TotalCompaniesWorked { get; set; }
+        public decimal? LastCompanySalary { get; set; }
+        public string? CompaniesWorkedJson { get; set; }
+        public List<CompanyExperienceDto> Companies { get; set; } = new();
+
         public string? LookingFor { get; set; }
 
         public string? ResumeUrl { get; set; }

@@ -215,6 +215,46 @@ try
                 IsDeleted BIT NOT NULL DEFAULT 0
             );
         END
+
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('JobSeekerProfiles') AND name = 'CurrentLocation')
+        BEGIN
+            ALTER TABLE JobSeekerProfiles ADD CurrentLocation NVARCHAR(MAX) NULL;
+        END
+
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('JobSeekerProfiles') AND name = 'EmploymentStatus')
+        BEGIN
+            ALTER TABLE JobSeekerProfiles ADD EmploymentStatus NVARCHAR(MAX) NULL;
+        END
+
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('JobSeekerProfiles') AND name = 'NoticePeriod')
+        BEGIN
+            ALTER TABLE JobSeekerProfiles ADD NoticePeriod INT NULL;
+        END
+
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('JobSeekerProfiles') AND name = 'TotalExperienceYears')
+        BEGIN
+            ALTER TABLE JobSeekerProfiles ADD TotalExperienceYears INT NULL;
+        END
+
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('JobSeekerProfiles') AND name = 'TotalExperienceMonths')
+        BEGIN
+            ALTER TABLE JobSeekerProfiles ADD TotalExperienceMonths INT NULL;
+        END
+
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('JobSeekerProfiles') AND name = 'TotalCompaniesWorked')
+        BEGIN
+            ALTER TABLE JobSeekerProfiles ADD TotalCompaniesWorked INT NULL;
+        END
+
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('JobSeekerProfiles') AND name = 'CompaniesWorkedJson')
+        BEGIN
+            ALTER TABLE JobSeekerProfiles ADD CompaniesWorkedJson NVARCHAR(MAX) NULL;
+        END
+
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('JobSeekerProfiles') AND name = 'LastCompanySalary')
+        BEGIN
+            ALTER TABLE JobSeekerProfiles ADD LastCompanySalary DECIMAL(18,2) NULL;
+        END
     ");
 }
 catch (Exception ex)

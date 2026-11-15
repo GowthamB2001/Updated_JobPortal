@@ -43,8 +43,19 @@ namespace JobPortal.Application.Mappings
             CreateMap<JobApplication, JobApplicationDto>().ReverseMap();
 
             CreateMap<JobRenewal, JobRenewalDto>().ReverseMap();
-            CreateMap<JobSeekerProfile, JobSeekerProfileDto>().ReverseMap();
-            CreateMap<JobSeekerProfile, JobSeekerLoginResponse>();
+
+            CreateMap<JobSeekerProfile, JobSeekerProfileDto>()
+                .ForMember(d => d.Companies, o => o.MapFrom(s =>
+                    string.IsNullOrWhiteSpace(s.CompaniesWorkedJson)
+                        ? new List<CompanyExperienceDto>()
+                        : System.Text.Json.JsonSerializer.Deserialize<List<CompanyExperienceDto>>(s.CompaniesWorkedJson, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<CompanyExperienceDto>()))
+                .ReverseMap();
+
+            CreateMap<JobSeekerProfile, JobSeekerLoginResponse>()
+                .ForMember(d => d.Companies, o => o.MapFrom(s =>
+                    string.IsNullOrWhiteSpace(s.CompaniesWorkedJson)
+                        ? new List<CompanyExperienceDto>()
+                        : System.Text.Json.JsonSerializer.Deserialize<List<CompanyExperienceDto>>(s.CompaniesWorkedJson, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<CompanyExperienceDto>()));
         }
     }
 }

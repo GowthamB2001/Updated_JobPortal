@@ -46,20 +46,19 @@ namespace JobPortal.Application.Features.RegisterJobSeeker.Command
 
             When(x => x.WorkExperience == "Experienced", () =>
             {
-                RuleFor(x => x.YearsOfExperience)
-                    .NotNull()
-                    .WithMessage(
-                        "Years of experience is required.");
+                RuleFor(x => x)
+                    .Must(x => x.YearsOfExperience.HasValue || x.TotalExperienceYears.HasValue || x.TotalExperienceMonths.HasValue)
+                    .WithMessage("Years of experience is required.");
 
-                RuleFor(x => x.LastRoleDesignation)
-                    .NotEmpty()
-                    .WithMessage(
-                        "Last role/designation is required.");
+                RuleFor(x => x)
+                    .Must(x => !string.IsNullOrWhiteSpace(x.LastRoleDesignation) || 
+                               (x.Companies != null && x.Companies.Any(c => !string.IsNullOrWhiteSpace(c.Designation))) ||
+                               !string.IsNullOrWhiteSpace(x.JobRole))
+                    .WithMessage("Role or designation is required.");
 
-                RuleFor(x => x.LastMonthSalary)
-                    .NotNull()
-                    .WithMessage(
-                        "Last month salary is required.");
+                RuleFor(x => x)
+                    .Must(x => x.LastMonthSalary.HasValue || x.LastCompanySalary.HasValue)
+                    .WithMessage("Last company salary is required.");
             });
 
             When(x => x.WorkExperience == "Fresher", () =>

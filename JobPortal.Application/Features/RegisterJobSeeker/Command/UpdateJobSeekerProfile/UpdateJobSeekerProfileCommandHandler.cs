@@ -40,6 +40,29 @@ namespace JobPortal.Application.Features.RegisterJobSeeker.Command.UpdateJobSeek
             profile.JobRole = request.JobRole;
             profile.LookingFor = request.LookingFor;
 
+            // Mobile UI Registration Fields
+            if (request.CurrentLocation != null) profile.CurrentLocation = request.CurrentLocation;
+            if (request.EmploymentStatus != null) profile.EmploymentStatus = request.EmploymentStatus;
+            if (request.NoticePeriod != null) profile.NoticePeriod = request.NoticePeriod;
+            if (request.TotalExperienceYears != null) profile.TotalExperienceYears = request.TotalExperienceYears;
+            if (request.TotalExperienceMonths != null) profile.TotalExperienceMonths = request.TotalExperienceMonths;
+            if (request.TotalCompaniesWorked != null) profile.TotalCompaniesWorked = request.TotalCompaniesWorked;
+            if (request.LastCompanySalary != null) profile.LastCompanySalary = request.LastCompanySalary;
+
+            if (request.Companies != null && request.Companies.Any())
+            {
+                profile.CompaniesWorkedJson = System.Text.Json.JsonSerializer.Serialize(request.Companies);
+            }
+            else if (request.CompaniesWorkedJson != null)
+            {
+                profile.CompaniesWorkedJson = request.CompaniesWorkedJson;
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.Email))
+            {
+                profile.Email = request.Email;
+            }
+
 
             if (request.Resume != null && request.Resume.Length > 0)
             {

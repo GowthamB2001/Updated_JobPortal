@@ -24,6 +24,32 @@ namespace JobPortal.Application.Features.RegisterJobSeeker.Command
             RegisterJobSeekerCommand request,
             CancellationToken cancellationToken)
         {
+            // Serialize Companies or use CompaniesWorkedJson
+            string? companiesJson = request.CompaniesWorkedJson;
+            if (request.Companies != null && request.Companies.Any())
+            {
+                companiesJson = System.Text.Json.JsonSerializer.Serialize(request.Companies);
+            }
+
+            // Fallbacks for backward compatibility
+            var yearsOfExp = request.YearsOfExperience;
+            if (!yearsOfExp.HasValue && (request.TotalExperienceYears.HasValue || request.TotalExperienceMonths.HasValue))
+            {
+                yearsOfExp = (request.TotalExperienceYears ?? 0) + Math.Round((request.TotalExperienceMonths ?? 0) / 12.0m, 2);
+            }
+
+            var lastMonthSal = request.LastMonthSalary;
+            if (!lastMonthSal.HasValue && request.LastCompanySalary.HasValue)
+            {
+                lastMonthSal = Math.Round(request.LastCompanySalary.Value / 12.0m, 2);
+            }
+
+            var lastRoleDesig = request.LastRoleDesignation;
+            if (string.IsNullOrWhiteSpace(lastRoleDesig) && request.Companies != null && request.Companies.Any())
+            {
+                lastRoleDesig = request.Companies.FirstOrDefault(c => !string.IsNullOrWhiteSpace(c.Designation))?.Designation;
+            }
+
             // =====================================================
             // GOOGLE USER
             // JobSeekerId already created during Google Login
@@ -71,16 +97,22 @@ namespace JobPortal.Application.Features.RegisterJobSeeker.Command
                 profile.Language = request.Language;
                 profile.KeySkills = request.KeySkills;
                 profile.WorkExperience = request.WorkExperience;
-                profile.YearsOfExperience =
-                    request.YearsOfExperience;
-                profile.LastRoleDesignation =
-                    request.LastRoleDesignation;
-                profile.LastMonthSalary =
-                    request.LastMonthSalary;
-                profile.PreferredLocation =
-                    request.PreferredLocation;
+                profile.YearsOfExperience = yearsOfExp;
+                profile.LastRoleDesignation = lastRoleDesig;
+                profile.LastMonthSalary = lastMonthSal;
+                profile.PreferredLocation = request.PreferredLocation;
                 profile.JobRole = request.JobRole;
                 profile.LookingFor = request.LookingFor;
+
+                // Mobile UI Registration Fields
+                profile.CurrentLocation = request.CurrentLocation;
+                profile.EmploymentStatus = request.EmploymentStatus;
+                profile.NoticePeriod = request.NoticePeriod;
+                profile.TotalExperienceYears = request.TotalExperienceYears;
+                profile.TotalExperienceMonths = request.TotalExperienceMonths;
+                profile.TotalCompaniesWorked = request.TotalCompaniesWorked;
+                profile.CompaniesWorkedJson = companiesJson;
+                profile.LastCompanySalary = request.LastCompanySalary;
 
                 // Don't create another ID
                 // Don't change Google-created identity
@@ -131,18 +163,24 @@ namespace JobPortal.Application.Features.RegisterJobSeeker.Command
                 Language = request.Language,
                 KeySkills = request.KeySkills,
                 WorkExperience = request.WorkExperience,
-                YearsOfExperience =
-                    request.YearsOfExperience,
-                LastRoleDesignation =
-                    request.LastRoleDesignation,
-                LastMonthSalary =
-                    request.LastMonthSalary,
-                PreferredLocation =
-                    request.PreferredLocation,
+                YearsOfExperience = yearsOfExp,
+                LastRoleDesignation = lastRoleDesig,
+                LastMonthSalary = lastMonthSal,
+                PreferredLocation = request.PreferredLocation,
                 JobRole = request.JobRole,
                 LookingFor = request.LookingFor,
                 ResumeUrl = resumeUrl,
                 Email = request.Email,
+
+                // Mobile UI Registration Fields
+                CurrentLocation = request.CurrentLocation,
+                EmploymentStatus = request.EmploymentStatus,
+                NoticePeriod = request.NoticePeriod,
+                TotalExperienceYears = request.TotalExperienceYears,
+                TotalExperienceMonths = request.TotalExperienceMonths,
+                TotalCompaniesWorked = request.TotalCompaniesWorked,
+                CompaniesWorkedJson = companiesJson,
+                LastCompanySalary = request.LastCompanySalary,
 
                 CreatedOn = DateTime.UtcNow,
                 ModifiedOn = DateTime.UtcNow,
