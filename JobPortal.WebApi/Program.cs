@@ -255,6 +255,48 @@ try
         BEGIN
             ALTER TABLE JobSeekerProfiles ADD LastCompanySalary DECIMAL(18,2) NULL;
         END
+
+        -- Recruiters Table Columns
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Recruiters') AND name = 'FirstName')
+        BEGIN
+            ALTER TABLE Recruiters ADD FirstName NVARCHAR(MAX) NULL;
+        END
+
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Recruiters') AND name = 'LastName')
+        BEGIN
+            ALTER TABLE Recruiters ADD LastName NVARCHAR(MAX) NULL;
+        END
+
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Recruiters') AND name = 'Designation')
+        BEGIN
+            ALTER TABLE Recruiters ADD Designation NVARCHAR(MAX) NULL;
+        END
+
+        -- Jobs Table Columns
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Jobs') AND name = 'AutoRepostDays')
+        BEGIN
+            ALTER TABLE Jobs ADD AutoRepostDays INT NOT NULL DEFAULT 1;
+        END
+
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Jobs') AND name = 'Currency')
+        BEGIN
+            ALTER TABLE Jobs ADD Currency NVARCHAR(MAX) NOT NULL DEFAULT 'INR';
+        END
+
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Jobs') AND name = 'IsDraft')
+        BEGIN
+            ALTER TABLE Jobs ADD IsDraft BIT NOT NULL DEFAULT 0;
+        END
+
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Jobs') AND name = 'MinSalary')
+        BEGIN
+            ALTER TABLE Jobs ADD MinSalary DECIMAL(18,2) NULL;
+        END
+
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Jobs') AND name = 'MaxSalary')
+        BEGIN
+            ALTER TABLE Jobs ADD MaxSalary DECIMAL(18,2) NULL;
+        END
     ");
 }
 catch (Exception ex)
