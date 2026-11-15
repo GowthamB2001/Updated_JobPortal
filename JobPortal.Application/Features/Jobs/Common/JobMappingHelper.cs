@@ -61,9 +61,10 @@ namespace JobPortal.Application.Features.Jobs.Common
                 : TimeSpan.Zero;
 
             double remainingSeconds = remainingSpan.TotalSeconds;
+            int totalHoursInt = (int)Math.Floor(remainingSpan.TotalHours);
             string closesIn = remainingSpan.TotalHours >= 24
                 ? $"{(int)remainingSpan.TotalDays}d {remainingSpan.Hours:D2}:{remainingSpan.Minutes:D2}:{remainingSpan.Seconds:D2}"
-                : $"{Math.Floor(remainingSpan.TotalHours):D2}:{remainingSpan.Minutes:D2}:{remainingSpan.Seconds:D2}";
+                : $"{totalHoursInt:D2}:{remainingSpan.Minutes:D2}:{remainingSpan.Seconds:D2}";
 
             // Applicants
             int applicantCount = allApplications?.Count(a => a.JobId == job.Id) ?? 0;
