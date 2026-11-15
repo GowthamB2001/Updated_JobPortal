@@ -112,7 +112,7 @@ namespace JobPortal.Application.Features.JobApplications.Queries.GetApplications
                 string salaryRange = !string.IsNullOrWhiteSpace(job?.SalaryRange)
                     ? job.SalaryRange
                     : (job?.MinSalary.HasValue == true && job?.MaxSalary.HasValue == true
-                        ? $"₹{job.MinSalary:N0} - ₹{job.MaxSalary:N0}"
+                        ? $"₹{Convert.ToInt64(job.MinSalary.Value):N0} - ₹{Convert.ToInt64(job.MaxSalary.Value):N0}"
                         : "$140k - $160k");
 
                 string aboutRole = !string.IsNullOrWhiteSpace(job?.JobDescription)

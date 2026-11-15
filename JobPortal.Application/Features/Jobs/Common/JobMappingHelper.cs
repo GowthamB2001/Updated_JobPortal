@@ -60,11 +60,16 @@ namespace JobPortal.Application.Features.Jobs.Common
                 ? job.ExpiryDate - DateTime.UtcNow
                 : TimeSpan.Zero;
 
-            double remainingSeconds = remainingSpan.TotalSeconds;
-            int totalHoursInt = (int)Math.Floor(remainingSpan.TotalHours);
+            double remainingSeconds = Math.Max(0, remainingSpan.TotalSeconds);
+            int totalHoursInt = (int)Math.Max(0, Math.Floor(remainingSpan.TotalHours));
+            int days = (int)Math.Max(0, remainingSpan.TotalDays);
+            int hours = Math.Max(0, remainingSpan.Hours);
+            int minutes = Math.Max(0, remainingSpan.Minutes);
+            int seconds = Math.Max(0, remainingSpan.Seconds);
+
             string closesIn = remainingSpan.TotalHours >= 24
-                ? $"{(int)remainingSpan.TotalDays}d {remainingSpan.Hours:D2}:{remainingSpan.Minutes:D2}:{remainingSpan.Seconds:D2}"
-                : $"{totalHoursInt:D2}:{remainingSpan.Minutes:D2}:{remainingSpan.Seconds:D2}";
+                ? $"{days}d {hours:D2}:{minutes:D2}:{seconds:D2}"
+                : $"{totalHoursInt:D2}:{minutes:D2}:{seconds:D2}";
 
             // Applicants
             int applicantCount = allApplications?.Count(a => a.JobId == job.Id) ?? 0;
@@ -102,7 +107,7 @@ namespace JobPortal.Application.Features.Jobs.Common
 
                 SalaryRange = !string.IsNullOrWhiteSpace(job.SalaryRange)
                     ? job.SalaryRange
-                    : (job.MinSalary.HasValue && job.MaxSalary.HasValue ? $"₹{job.MinSalary:N0} - ₹{job.MaxSalary:N0}" : "₹5,00,000 - ₹15,00,000"),
+                    : (job.MinSalary.HasValue && job.MaxSalary.HasValue ? $"₹{Convert.ToInt64(job.MinSalary.Value):N0} - ₹{Convert.ToInt64(job.MaxSalary.Value):N0}" : "₹5,00,000 - ₹15,00,000"),
                 MinSalary = job.MinSalary ?? 500000,
                 MaxSalary = job.MaxSalary ?? 1500000,
                 Currency = string.IsNullOrWhiteSpace(job.Currency) ? "INR" : job.Currency,
