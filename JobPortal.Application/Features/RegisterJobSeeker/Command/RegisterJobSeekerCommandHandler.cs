@@ -1,4 +1,4 @@
-﻿using JobPortal.Application.Contracts.Infrastructure;
+using JobPortal.Application.Contracts.Infrastructure;
 using JobPortal.Application.Contracts.Persistence;
 using JobPortal.Application.Features.JobSeekers.Commands.RegisterJobSeeker;
 using JobPortal.Domain.Domain.Entities;

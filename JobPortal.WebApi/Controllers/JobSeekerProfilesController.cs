@@ -48,19 +48,27 @@ namespace JobPortal.WebApi.Controllers
             return Ok(result);
         }
 
-        [Authorize]
         [HttpGet("my-profile")]
-        public async Task<IActionResult> GetMyProfile()
+        public async Task<IActionResult> GetMyProfile([FromQuery] Guid? jobSeekerId = null)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                 ?? User.FindFirst("sub")?.Value;
 
-            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var profileId))
+            Guid profileId;
+            if (jobSeekerId.HasValue && jobSeekerId.Value != Guid.Empty)
+            {
+                profileId = jobSeekerId.Value;
+            }
+            else if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out var claimId))
+            {
+                profileId = claimId;
+            }
+            else
             {
                 return Unauthorized(new
                 {
                     Success = false,
-                    Message = "Invalid or missing token claims."
+                    Message = "Invalid or missing token claims or jobSeekerId."
                 });
             }
 
@@ -68,6 +76,27 @@ namespace JobPortal.WebApi.Controllers
                 new GetJobSeekerProfileByIdQuery
                 {
                     Id = profileId
+                });
+
+            if (result == null)
+            {
+                return NotFound(new
+                {
+                    Success = false,
+                    Message = "Job seeker profile not found."
+                });
+            }
+
+            return Ok(result);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var result = await _mediator.Send(
+                new GetJobSeekerProfileByIdQuery
+                {
+                    Id = id
                 });
 
             if (result == null)

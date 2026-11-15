@@ -1,4 +1,4 @@
-﻿using JobPortal.Application.DTOs.JobSeekers;
+using JobPortal.Application.DTOs.JobSeekers;
 using MediatR;
 
 namespace JobPortal.Application.Features.JobSeekers.Commands.RegisterJobSeeker

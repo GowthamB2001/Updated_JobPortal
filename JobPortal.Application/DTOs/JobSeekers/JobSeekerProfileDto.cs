@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -50,5 +50,15 @@ namespace JobPortal.Application.DTOs.JobSeekers
         public string? ResumeUrl { get; set; }
 
         public string? Email { get; set; }
+
+        public bool IsProfileCompleted =>
+            !string.IsNullOrWhiteSpace(MobileNo) &&
+            !string.IsNullOrWhiteSpace(Gender) &&
+            !string.IsNullOrWhiteSpace(Education) &&
+            !string.IsNullOrWhiteSpace(Language) &&
+            !string.IsNullOrWhiteSpace(KeySkills) &&
+            !string.IsNullOrWhiteSpace(WorkExperience) &&
+            !string.IsNullOrWhiteSpace(PreferredLocation) &&
+            !string.IsNullOrWhiteSpace(JobRole);
     }
 }

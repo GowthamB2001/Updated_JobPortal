@@ -45,17 +45,34 @@ namespace JobPortal.Application.Mappings
             CreateMap<JobRenewal, JobRenewalDto>().ReverseMap();
 
             CreateMap<JobSeekerProfile, JobSeekerProfileDto>()
-                .ForMember(d => d.Companies, o => o.MapFrom(s =>
-                    string.IsNullOrWhiteSpace(s.CompaniesWorkedJson)
-                        ? new List<CompanyExperienceDto>()
-                        : System.Text.Json.JsonSerializer.Deserialize<List<CompanyExperienceDto>>(s.CompaniesWorkedJson, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<CompanyExperienceDto>()))
-                .ReverseMap();
+                .ForMember(d => d.Companies, o => o.MapFrom(s => SafeDeserializeCompanies(s.CompaniesWorkedJson)));
+
+            CreateMap<JobSeekerProfileDto, JobSeekerProfile>()
+                .ForMember(d => d.CompaniesWorkedJson, o => o.MapFrom(s =>
+                    s.Companies != null && s.Companies.Any()
+                        ? System.Text.Json.JsonSerializer.Serialize(s.Companies, (System.Text.Json.JsonSerializerOptions?)null)
+                        : s.CompaniesWorkedJson));
 
             CreateMap<JobSeekerProfile, JobSeekerLoginResponse>()
-                .ForMember(d => d.Companies, o => o.MapFrom(s =>
-                    string.IsNullOrWhiteSpace(s.CompaniesWorkedJson)
-                        ? new List<CompanyExperienceDto>()
-                        : System.Text.Json.JsonSerializer.Deserialize<List<CompanyExperienceDto>>(s.CompaniesWorkedJson, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<CompanyExperienceDto>()));
+                .ForMember(d => d.Companies, o => o.MapFrom(s => SafeDeserializeCompanies(s.CompaniesWorkedJson)));
+        }
+
+        private static List<CompanyExperienceDto> SafeDeserializeCompanies(string? json)
+        {
+            if (string.IsNullOrWhiteSpace(json))
+                return new List<CompanyExperienceDto>();
+
+            try
+            {
+                return System.Text.Json.JsonSerializer.Deserialize<List<CompanyExperienceDto>>(
+                    json,
+                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                    ?? new List<CompanyExperienceDto>();
+            }
+            catch
+            {
+                return new List<CompanyExperienceDto>();
+            }
         }
     }
 }
