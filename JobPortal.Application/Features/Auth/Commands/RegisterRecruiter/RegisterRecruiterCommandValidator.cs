@@ -1,9 +1,4 @@
-﻿using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using FluentValidation;
 
 namespace JobPortal.Application.Features.Auth.Commands.RegisterRecruiter
 {
@@ -14,31 +9,27 @@ namespace JobPortal.Application.Features.Auth.Commands.RegisterRecruiter
         {
             RuleFor(x => x.OfficialEmail)
                 .NotEmpty()
-                .EmailAddress();
+                .When(x => string.IsNullOrWhiteSpace(x.CompanyEmail))
+                .WithMessage("Official Company Email is required.")
+                .EmailAddress().WithMessage("A valid email address is required.");
 
             RuleFor(x => x.OrganizationType)
-                .IsInEnum();
+                .IsInEnum().WithMessage("A valid recruiter organization type must be selected.");
 
-            RuleFor(x => x.RecruiterName)
-                .NotEmpty()
-                .MaximumLength(100);
+            RuleFor(x => x)
+                .Must(x => !string.IsNullOrWhiteSpace(x.RecruiterName) || !string.IsNullOrWhiteSpace(x.FirstName))
+                .WithMessage("First Name or Recruiter Name is required.");
 
-            RuleFor(x => x.OrganizationName)
-                .NotEmpty()
-                .MaximumLength(200);
-
-            RuleFor(x => x.Address)
-                .NotEmpty()
-                .MaximumLength(500);
+            RuleFor(x => x)
+                .Must(x => !string.IsNullOrWhiteSpace(x.OrganizationName) || !string.IsNullOrWhiteSpace(x.CompanyName))
+                .WithMessage("Company Name is required.");
 
             RuleFor(x => x.MobileNumber)
-                .NotEmpty()
-                .Matches(@"^[6-9]\d{9}$")
-                .WithMessage("Invalid Mobile Number");
+                .NotEmpty().WithMessage("Mobile Number is required.");
 
             RuleFor(x => x.Password)
-                .NotEmpty()
-                .MinimumLength(8);
+                .NotEmpty().WithMessage("Password is required.")
+                .MinimumLength(6).WithMessage("Password must be at least 6 characters long.");
 
             RuleFor(x => x.ConfirmPassword)
                 .Equal(x => x.Password)

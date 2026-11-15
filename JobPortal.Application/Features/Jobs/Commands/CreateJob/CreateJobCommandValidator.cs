@@ -1,9 +1,4 @@
-﻿using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using FluentValidation;
 
 namespace JobPortal.Application.Features.Jobs.Commands.CreateJob
 {
@@ -12,42 +7,38 @@ namespace JobPortal.Application.Features.Jobs.Commands.CreateJob
         public CreateJobValidator()
         {
             RuleFor(x => x.RecruiterId)
-                .NotEmpty();
+                .NotEmpty().WithMessage("Recruiter ID is required.");
 
             RuleFor(x => x.Title)
-                .NotEmpty()
+                .NotEmpty().WithMessage("Job Title is required.")
                 .MaximumLength(150);
 
-            RuleFor(x => x.Company)
-                .NotEmpty();
-
             RuleFor(x => x.Location)
-                .NotEmpty();
+                .NotEmpty().WithMessage("Job Location is required.");
 
             RuleFor(x => x.SalaryRange)
-                .NotEmpty();
+                .NotEmpty()
+                .When(x => !x.MinSalary.HasValue && !x.MaxSalary.HasValue)
+                .WithMessage("Salary Range or Minimum/Maximum Salary is required.");
 
             RuleFor(x => x.Experience)
-                .NotEmpty();
+                .NotEmpty().WithMessage("Experience is required.");
 
             RuleFor(x => x.JobDescription)
-                .NotEmpty();
-
-            RuleFor(x => x.CompanyOverview)
-                .NotEmpty();
+                .NotEmpty().WithMessage("Job Description is required.");
 
             RuleFor(x => x.Openings)
-                .NotEmpty();
+                .NotEmpty().WithMessage("Openings count is required.");
 
             RuleFor(x => x.WorkMode)
-                .NotEmpty();
+                .NotEmpty().WithMessage("Work Mode is required.");
 
             RuleFor(x => x.JobType)
-                .IsInEnum();
+                .IsInEnum().WithMessage("A valid Job Type must be selected.");
 
             RuleFor(x => x.KeySkills)
                 .NotEmpty()
-                .WithMessage("At least one skill is required.");
+                .WithMessage("At least one key skill is required.");
         }
     }
 }

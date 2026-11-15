@@ -9,6 +9,8 @@ using Serilog;
 using JobPortal.Application.DependencyInjection;
 using JobPortal.Infrastructure.DependencyInjection;
 using JobPortal.Persistence.DependencyInjection;
+using JobPortal.Persistence.Context;
+using Microsoft.EntityFrameworkCore;
 using JobPortal.Infrastructure.Services;
 
 
@@ -92,9 +94,10 @@ builder.Services.AddSwaggerGen(c =>
 
             if (docName == "recruiter")
             {
-                if (controller is "Companies" or "JobRenewals" or "Recruiters") return true;
+                if (controller is "Companies" or "JobRenewals" or "Recruiters" or "Notifications" or "AppInfo") return true;
+                if (controller == "Applications" && actionName is "GetByJob" or "GetById" or "UpdateStatus") return true;
                 if (controller == "Jobs" && !path.Contains("search")) return true;
-                if (controller == "Auth" && actionName is "Login" or "Register" or "SendEmailVerification" or "VerifyEmail") return true;
+                if (controller == "Auth" && actionName is "Login" or "Register" or "SendEmailVerification" or "VerifyEmail" or "ForgotPassword" or "VerifyResetOtp" or "ResetPassword") return true;
                 if (controller == "Interviews" && actionName is "Create" or "UpdateStatus" or "GetByApplication") return true;
                 if (controller == "JobSeekerProfiles" && actionName is "GetAll") return true;
                 if (controller == "JobSeekers" && actionName is "GetById") return true;
@@ -105,7 +108,8 @@ builder.Services.AddSwaggerGen(c =>
 
             if (docName == "jobseeker")
             {
-                if (controller is "JobSeekerProfiles" or "Resumes" or "Applications") return true;
+                if (controller is "JobSeekerProfiles" or "Resumes" or "Applications" or "Notifications" or "SavedJobs" or "AppInfo") return true;
+                if (controller == "Dashboard" && actionName == "GetJobSeekerDashboard") return true;
                 if (controller == "Jobs" && path.Contains("search")) return true;
                 if (controller == "Auth" && actionName is "GoogleLogin") return true;
                 if (controller == "Interviews" && actionName is "Accept" or "Reject" or "GetByApplication") return true;
@@ -178,5 +182,44 @@ app.UseAuthorization();
 
 
 app.MapControllers();
+
+try
+{
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    dbContext.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Notifications')
+        BEGIN
+            CREATE TABLE Notifications (
+                Id UNIQUEIDENTIFIER PRIMARY KEY,
+                UserId UNIQUEIDENTIFIER NOT NULL,
+                Title NVARCHAR(MAX) NOT NULL,
+                Message NVARCHAR(MAX) NOT NULL,
+                Type NVARCHAR(100) NOT NULL DEFAULT 'General',
+                TargetUrl NVARCHAR(MAX) NULL,
+                IsRead BIT NOT NULL DEFAULT 0,
+                CreatedOn DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+                ModifiedOn DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+                IsDeleted BIT NOT NULL DEFAULT 0
+            );
+        END
+
+        IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'SavedJobs')
+        BEGIN
+            CREATE TABLE SavedJobs (
+                Id UNIQUEIDENTIFIER PRIMARY KEY,
+                JobSeekerProfileId UNIQUEIDENTIFIER NOT NULL,
+                JobId UNIQUEIDENTIFIER NOT NULL,
+                CreatedOn DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+                ModifiedOn DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+                IsDeleted BIT NOT NULL DEFAULT 0
+            );
+        END
+    ");
+}
+catch (Exception ex)
+{
+    Log.Warning(ex, "Failed to initialize or check database tables Notifications/SavedJobs.");
+}
 
 app.Run();

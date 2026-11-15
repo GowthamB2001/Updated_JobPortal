@@ -1,4 +1,4 @@
-﻿using JobPortal.Domain.Domain.Entities;
+using JobPortal.Domain.Domain.Entities;
 using JobPortal.Persistence.Configurations;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -36,6 +36,8 @@ namespace JobPortal.Persistence.Context
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<Company> Companies { get; set; }
         public DbSet<EmailVerification> EmailVerifications { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<SavedJob> SavedJobs { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(
@@ -62,6 +64,19 @@ namespace JobPortal.Persistence.Context
                 .WithMany(x => x.JobApplications)
                 .HasForeignKey(x => x.JobSeekerId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SavedJob>()
+                .HasOne(x => x.Job)
+                .WithMany()
+                .HasForeignKey(x => x.JobId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<SavedJob>()
+                .HasOne(x => x.JobSeekerProfile)
+                .WithMany()
+                .HasForeignKey(x => x.JobSeekerProfileId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.ApplyConfiguration(new GoogleLoginConfiguration());
         }
 

@@ -1,4 +1,4 @@
-﻿using JobPortal.Application.Features.Jobs.Commands.CreateJob;
+using JobPortal.Application.Features.Jobs.Commands.CreateJob;
 using JobPortal.Application.Features.Jobs.Queries.GetJobById;
 using JobPortal.Application.Features.Jobs.Commands.UpdateJob;
 using JobPortal.Application.Features.Jobs.Commands.DeleteJob;
@@ -42,14 +42,21 @@ namespace JobPortal.WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(
-      CreateJobCommand command)
+        public async Task<IActionResult> Create(CreateJobCommand command)
         {
+            var recruiterIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? User.FindFirst("sub")?.Value;
+
+            if (Guid.TryParse(recruiterIdClaim, out var recruiterId) && command.RecruiterId == Guid.Empty)
+            {
+                command.RecruiterId = recruiterId;
+            }
+
             var jobId = await _mediator.Send(command);
 
             return Ok(new
             {
-                Message = "Job created successfully.",
+                Message = command.IsDraft ? "Job saved as draft successfully." : "Job created successfully.",
                 JobId = jobId
             });
         }

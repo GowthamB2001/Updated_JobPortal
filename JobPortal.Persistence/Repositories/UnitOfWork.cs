@@ -1,4 +1,4 @@
-﻿using JobPortal.Application.Contracts.Persistence;
+using JobPortal.Application.Contracts.Persistence;
 using JobPortal.Domain.Domain.Entities;
 using JobPortal.Persistence.Context;
 using System;
@@ -35,6 +35,8 @@ namespace JobPortal.Persistence.Repositories
             RefreshTokens =
         new RefreshTokenRepository(_context);
             Companies = new CompanyRepository(_context);
+            Notifications = new NotificationRepository(_context);
+            SavedJobs = new SavedJobRepository(_context);
 
         }
 
@@ -57,6 +59,8 @@ namespace JobPortal.Persistence.Repositories
         public IGoogleLoginRepository GoogleLogin { get; }
         public ICompanyRepository Companies { get; }
         public IInterviewRepository Interviews { get; }
+        public INotificationRepository Notifications { get; }
+        public ISavedJobRepository SavedJobs { get; }
 
         // Save all changes in one transaction
         public async Task<int> SaveChangesAsync()

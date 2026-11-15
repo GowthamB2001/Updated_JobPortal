@@ -1,10 +1,7 @@
-﻿using JobPortal.Domain.Domain.Enums;
+using JobPortal.Domain.Domain.Enums;
 using MediatR;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace JobPortal.Application.Features.Jobs.Commands.UpdateJob
 {
@@ -22,7 +19,13 @@ namespace JobPortal.Application.Features.Jobs.Commands.UpdateJob
 
         public List<string> KeySkills { get; set; } = new();
 
-        public string SalaryRange { get; set; } = string.Empty;
+        public string? SalaryRange { get; set; }
+
+        public decimal? MinSalary { get; set; }
+
+        public decimal? MaxSalary { get; set; }
+
+        public string Currency { get; set; } = "INR";
 
         public string Experience { get; set; } = string.Empty;
 
@@ -35,5 +38,9 @@ namespace JobPortal.Application.Features.Jobs.Commands.UpdateJob
         public string Openings { get; set; } = string.Empty;
 
         public string CompanyOverview { get; set; } = string.Empty;
+
+        public int AutoRepostDays { get; set; } = 1;
+
+        public bool IsDraft { get; set; } = false;
     }
 }

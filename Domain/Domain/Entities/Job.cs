@@ -1,4 +1,4 @@
-﻿using JobPortal.Domain.Domain.Common;
+using JobPortal.Domain.Domain.Common;
 using JobPortal.Domain.Domain.Enums;
 using System;
 using System.Collections.Generic;
@@ -22,6 +22,12 @@ namespace JobPortal.Domain.Domain.Entities
 
         public string SalaryRange { get; set; } = string.Empty;
 
+        public decimal? MinSalary { get; set; }
+
+        public decimal? MaxSalary { get; set; }
+
+        public string Currency { get; set; } = "INR";
+
         public string Experience { get; set; } = string.Empty;
 
         public JobType JobType { get; set; }
@@ -33,6 +39,10 @@ namespace JobPortal.Domain.Domain.Entities
         public string Openings { get; set; } = string.Empty;
 
         public string CompanyOverview { get; set; } = string.Empty;
+
+        public int AutoRepostDays { get; set; } = 1;
+
+        public bool IsDraft { get; set; } = false;
 
         public int RepostCount { get; set; } = 0;
         public DateTime ExpiryDate { get; set; }

@@ -1,4 +1,4 @@
-﻿using JobPortal.Application.Contracts.Persistence;
+using JobPortal.Application.Contracts.Persistence;
 using MediatR;
 using System;
 using System.Collections.Generic;

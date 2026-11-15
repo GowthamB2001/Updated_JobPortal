@@ -1,4 +1,4 @@
-﻿using JobPortal.Application.Contracts.Persistence;
+using JobPortal.Application.Contracts.Persistence;
 using JobPortal.Persistence.Context;
 using JobPortal.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -46,6 +46,8 @@ namespace JobPortal.Persistence.DependencyInjection
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             services.AddScoped<ICompanyRepository, CompanyRepository>();
             services.AddScoped<IJobSeekerProfileRepository, JobSeekerProfileRepository>();
+            services.AddScoped<INotificationRepository, NotificationRepository>();
+            services.AddScoped<ISavedJobRepository, SavedJobRepository>();
             return services;
         }
     }

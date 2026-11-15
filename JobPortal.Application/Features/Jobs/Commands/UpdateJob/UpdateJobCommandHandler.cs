@@ -1,9 +1,9 @@
-﻿using JobPortal.Application.Contracts.Persistence;
+using JobPortal.Application.Contracts.Persistence;
 using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace JobPortal.Application.Features.Jobs.Commands.UpdateJob
@@ -37,34 +37,60 @@ namespace JobPortal.Application.Features.Jobs.Commands.UpdateJob
             if (job == null)
                 throw new Exception("Job not found.");
 
+            // Formulate salary range if needed
+            var salaryRange = request.SalaryRange;
+            if (string.IsNullOrWhiteSpace(salaryRange))
+            {
+                if (request.MinSalary.HasValue && request.MaxSalary.HasValue)
+                    salaryRange = $"₹{request.MinSalary:N0} - ₹{request.MaxSalary:N0}";
+                else if (request.MinSalary.HasValue)
+                    salaryRange = $"₹{request.MinSalary:N0}+";
+            }
+
             job.Title = request.Title;
             job.Company = request.Company;
             job.Location = request.Location;
-            job.SalaryRange = request.SalaryRange;
+            job.SalaryRange = salaryRange ?? job.SalaryRange;
+            job.MinSalary = request.MinSalary ?? job.MinSalary;
+            job.MaxSalary = request.MaxSalary ?? job.MaxSalary;
+            job.Currency = string.IsNullOrWhiteSpace(request.Currency) ? job.Currency : request.Currency;
             job.Experience = request.Experience;
             job.JobType = request.JobType;
             job.WorkMode = request.WorkMode;
             job.JobDescription = request.JobDescription;
             job.Openings = request.Openings;
             job.CompanyOverview = request.CompanyOverview;
+            job.AutoRepostDays = request.AutoRepostDays > 0 ? request.AutoRepostDays : job.AutoRepostDays;
+            job.IsDraft = request.IsDraft;
+            job.IsActive = !request.IsDraft;
+            job.ModifiedOn = DateTime.UtcNow;
 
             await _jobRepository.UpdateAsync(job);
 
             // Remove old skills
-            foreach (var skill in job.JobSkills.ToList())
+            if (job.JobSkills != null)
             {
-                await _jobSkillRepository.DeleteAsync(skill);
+                foreach (var skill in job.JobSkills.ToList())
+                {
+                    await _jobSkillRepository.DeleteAsync(skill);
+                }
             }
 
             // Add new skills
-            foreach (var skill in request.KeySkills)
+            if (request.KeySkills != null)
             {
-                await _jobSkillRepository.AddAsync(
-                    new JobPortal.Domain.Domain.Entities.JobSkill
+                foreach (var skill in request.KeySkills)
+                {
+                    if (!string.IsNullOrWhiteSpace(skill))
                     {
-                        JobId = job.Id,
-                        SkillName = skill
-                    });
+                        await _jobSkillRepository.AddAsync(
+                            new JobPortal.Domain.Domain.Entities.JobSkill
+                            {
+                                JobId = job.Id,
+                                SkillName = skill.Trim()
+                            });
+                    }
+                }
             }
 
             await _unitOfWork.SaveChangesAsync();

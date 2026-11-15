@@ -1,4 +1,4 @@
-﻿using JobPortal.Application.DTOs.Applications;
+using JobPortal.Application.DTOs.Applications;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -12,5 +12,6 @@ namespace JobPortal.Application.Features.JobApplications.Queries.GetApplications
          : IRequest<List<JobApplicationDto>>
     {
         public Guid JobSeekerId { get; set; }
+        public string? Status { get; set; }
     }
 }

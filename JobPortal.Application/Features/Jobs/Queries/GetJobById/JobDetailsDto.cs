@@ -1,15 +1,16 @@
-﻿using JobPortal.Domain.Domain.Enums;
+using JobPortal.Domain.Domain.Enums;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace JobPortal.Application.Features.Jobs.Queries.GetJobById
 {
     public class JobDetailsDto
     {
         public Guid Id { get; set; }
+
+        public Guid RecruiterId { get; set; }
+
+        public string? RecruiterType { get; set; }
 
         public string Title { get; set; } = string.Empty;
 
@@ -18,6 +19,12 @@ namespace JobPortal.Application.Features.Jobs.Queries.GetJobById
         public string Location { get; set; } = string.Empty;
 
         public string SalaryRange { get; set; } = string.Empty;
+
+        public decimal? MinSalary { get; set; }
+
+        public decimal? MaxSalary { get; set; }
+
+        public string Currency { get; set; } = "INR";
 
         public string Experience { get; set; } = string.Empty;
 
@@ -30,6 +37,10 @@ namespace JobPortal.Application.Features.Jobs.Queries.GetJobById
         public string Openings { get; set; } = string.Empty;
 
         public string CompanyOverview { get; set; } = string.Empty;
+
+        public int AutoRepostDays { get; set; } = 1;
+
+        public bool IsDraft { get; set; }
 
         public DateTime PostedOn { get; set; }
 

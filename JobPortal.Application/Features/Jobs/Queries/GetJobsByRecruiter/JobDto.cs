@@ -1,15 +1,16 @@
-﻿using JobPortal.Domain.Domain.Enums;
+using JobPortal.Domain.Domain.Enums;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace JobPortal.Application.Features.Jobs.Queries.GetJobsByRecruiter
 {
     public class JobDto
     {
         public Guid Id { get; set; }
+
+        public Guid RecruiterId { get; set; }
+
+        public string? RecruiterType { get; set; }
 
         public string Title { get; set; } = string.Empty;
 
@@ -19,11 +20,27 @@ namespace JobPortal.Application.Features.Jobs.Queries.GetJobsByRecruiter
 
         public string SalaryRange { get; set; } = string.Empty;
 
+        public decimal? MinSalary { get; set; }
+
+        public decimal? MaxSalary { get; set; }
+
+        public string Currency { get; set; } = "INR";
+
         public string Experience { get; set; } = string.Empty;
 
         public JobType JobType { get; set; }
 
         public string WorkMode { get; set; } = string.Empty;
+
+        public string JobDescription { get; set; } = string.Empty;
+
+        public string Openings { get; set; } = string.Empty;
+
+        public string CompanyOverview { get; set; } = string.Empty;
+
+        public int AutoRepostDays { get; set; } = 1;
+
+        public bool IsDraft { get; set; }
 
         public int RepostCount { get; set; }
 

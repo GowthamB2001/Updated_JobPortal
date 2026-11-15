@@ -1,10 +1,7 @@
-﻿using JobPortal.Application.DTOs.Applications;
+using JobPortal.Application.DTOs.Applications;
 using MediatR;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace JobPortal.Application.Features.JobApplications.Queries.GetApplicationsByJob
 {
@@ -12,5 +9,6 @@ namespace JobPortal.Application.Features.JobApplications.Queries.GetApplications
         : IRequest<List<JobApplicationDto>>
     {
         public Guid JobId { get; set; }
+        public Guid? RecruiterId { get; set; }
     }
 }

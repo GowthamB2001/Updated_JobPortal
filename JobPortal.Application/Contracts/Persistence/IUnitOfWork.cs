@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,6 +27,8 @@ namespace JobPortal.Application.Contracts.Persistence
         IInterviewRepository Interviews { get; }
         ICompanyRepository Companies { get; }
         IGoogleLoginRepository GoogleLogin { get; }
+        INotificationRepository Notifications { get; }
+        ISavedJobRepository SavedJobs { get; }
         Task<int> SaveChangesAsync();
     }
 }

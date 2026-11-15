@@ -1,4 +1,6 @@
-﻿using JobPortal.Application.Features.Dashboard.Queries.GetDashboardStats;
+using System.Security.Claims;
+using JobPortal.Application.Features.Dashboard.Queries.GetDashboardStats;
+using JobPortal.Application.Features.Dashboard.Queries.GetJobSeekerDashboard;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -25,6 +27,22 @@ namespace JobPortal.WebApi.Controllers
             return Ok(
                 await _mediator.Send(
                     new GetDashboardStatsQuery()));
+        }
+
+        [HttpGet("jobseeker")]
+        public async Task<IActionResult> GetJobSeekerDashboard()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? User.FindFirst("sub")?.Value;
+            Guid? seekerId = Guid.TryParse(userIdClaim, out var id) ? id : null;
+
+            var result = await _mediator.Send(new GetJobSeekerDashboardQuery { JobSeekerId = seekerId });
+
+            return Ok(new
+            {
+                Success = true,
+                Data = result
+            });
         }
     }
 }

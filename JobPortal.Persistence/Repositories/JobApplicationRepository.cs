@@ -1,4 +1,4 @@
-﻿using JobPortal.Application.Contracts.Persistence;
+using JobPortal.Application.Contracts.Persistence;
 using JobPortal.Domain.Domain.Entities;
 using JobPortal.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
@@ -41,6 +41,7 @@ namespace JobPortal.Persistence.Repositories
         {
             return await _context.JobApplications
                 .Include(x => x.Job)
+                    .ThenInclude(j => j.JobSkills)
                 .Where(x => x.JobSeekerId == jobSeekerId)
                 .OrderByDescending(x => x.AppliedOn)
                 .ToListAsync();

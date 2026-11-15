@@ -1,10 +1,12 @@
-﻿using JobPortal.Application.Contracts.Persistence;
+using JobPortal.Application.Contracts.Persistence;
 using JobPortal.Application.DTOs.Jobs;
+using JobPortal.Application.Features.Jobs.Common;
+using JobPortal.Domain.Domain.Entities;
 using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace JobPortal.Application.Features.Jobs.Queries.GetAllJobs
@@ -23,30 +25,18 @@ namespace JobPortal.Application.Features.Jobs.Queries.GetAllJobs
             GetAllJobsQuery request,
             CancellationToken cancellationToken)
         {
-            var jobs = await _unitOfWork.Jobs.GetAllJobsAsync();
-
-            return jobs.Select(job => new JobListDto
+            JobSeekerProfile? profile = null;
+            IReadOnlyCollection<Guid>? savedJobIds = null;
+            if (request.JobSeekerId.HasValue)
             {
-                Id = job.Id,
-                Title = job.Title,
-                Company = job.Company,
-                Location = job.Location,
-                SalaryRange = job.SalaryRange,
-                Experience = job.Experience,
-                JobType = job.JobType,
-                WorkMode = job.WorkMode,
-                PostedOn = job.PostedOn,
-                JobDescription = job.JobDescription,
-                Openings = job.Openings,
+                profile = await _unitOfWork.JobSeekerProfile.GetByIdAsync(request.JobSeekerId.Value);
+                savedJobIds = await _unitOfWork.SavedJobs.GetSavedJobIdsAsync(request.JobSeekerId.Value);
+            }
 
-                // Company entity-la add pannina fill pannunga
-                CompanyProfile = null,
-                CompanyOverview = null,
+            var jobs = await _unitOfWork.Jobs.GetAllJobsAsync();
+            var applications = (await _unitOfWork.JobApplications.GetAllAsync()).ToList();
 
-                KeySkills = job.JobSkills
-                    .Select(x => x.SkillName)
-                    .ToList()
-            }).ToList();
+            return jobs.Select(job => JobMappingHelper.MapToJobListDto(job, profile, applications, savedJobIds)).ToList();
         }
     }
 }

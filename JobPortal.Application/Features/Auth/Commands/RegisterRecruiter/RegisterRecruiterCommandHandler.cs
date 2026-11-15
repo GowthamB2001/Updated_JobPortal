@@ -1,11 +1,15 @@
-﻿using JobPortal.Application.Contracts.Persistence;
+using JobPortal.Application.Contracts.Persistence;
 using JobPortal.Domain.Domain.Entities;
 using MediatR;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace JobPortal.Application.Features.Auth.Commands.RegisterRecruiter
 {
     public class RegisterRecruiterCommandHandler
-        : IRequestHandler<RegisterRecruiterCommand, bool>
+        : IRequestHandler<RegisterRecruiterCommand, Guid>
     {
         private readonly IRecruiterRepository _recruiterRepository;
         private readonly IEmailVerificationRepository _emailVerificationRepository;
@@ -21,51 +25,86 @@ namespace JobPortal.Application.Features.Auth.Commands.RegisterRecruiter
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<bool> Handle(
+        public async Task<Guid> Handle(
             RegisterRecruiterCommand request,
             CancellationToken cancellationToken)
         {
-            // Check Email Verification
+            var email = !string.IsNullOrWhiteSpace(request.OfficialEmail)
+                ? request.OfficialEmail.Trim()
+                : request.CompanyEmail?.Trim();
+
+            if (string.IsNullOrWhiteSpace(email))
+                throw new Exception("Official company email is required.");
+
+            var companyName = !string.IsNullOrWhiteSpace(request.CompanyName)
+                ? request.CompanyName.Trim()
+                : (!string.IsNullOrWhiteSpace(request.OrganizationName) ? request.OrganizationName.Trim() : "");
+
+            if (string.IsNullOrWhiteSpace(companyName))
+                throw new Exception("Company Name is required.");
+
+            var recruiterName = request.RecruiterName?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(recruiterName))
+            {
+                var parts = new[] { request.FirstName, request.LastName }
+                    .Where(p => !string.IsNullOrWhiteSpace(p));
+                recruiterName = string.Join(" ", parts).Trim();
+            }
+
+            if (string.IsNullOrWhiteSpace(recruiterName))
+                throw new Exception("First Name or Recruiter Name is required.");
+
+            var designation = !string.IsNullOrWhiteSpace(request.Designation)
+                ? request.Designation.Trim()
+                : request.JobTitle?.Trim();
+
+            // 1. Check Email Verification
             var verification = await _emailVerificationRepository
-                .GetByCompanyEmailAsync(request.OfficialEmail);
+                .GetByCompanyEmailAsync(email);
 
             if (verification == null)
-                throw new Exception("Email verification not found.");
+                throw new Exception("Email verification record not found. Please send verification code first.");
 
             if (!verification.IsVerified)
-                throw new Exception("Please verify your email first.");
+                throw new Exception("Please verify your official company email with the OTP first.");
 
-            // Check Already Registered
+            // 2. Check Already Registered
             var exists = await _recruiterRepository
-                .ExistsByOfficialEmailAsync(request.OfficialEmail);
+                .ExistsByOfficialEmailAsync(email);
 
             if (exists)
-                throw new Exception("Recruiter already registered.");
+                throw new Exception("A recruiter with this official email is already registered.");
 
-            // Create Recruiter
+            // 3. Create Recruiter
             var recruiter = new Recruiter
             {
-                OfficialEmail = request.OfficialEmail,
+                Id = Guid.NewGuid(),
+                OfficialEmail = email,
                 OrganizationType = request.OrganizationType,
-                RecruiterName = request.RecruiterName,
-                OrganizationName = request.OrganizationName,
-                Address = request.Address,
-                MobileNumber = request.MobileNumber,
-                EmployeeId = request.EmployeeId,
-                GstNumber = request.GstNumber,
-                Website = request.Website,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
+                FirstName = request.FirstName?.Trim(),
+                LastName = request.LastName?.Trim(),
+                RecruiterName = recruiterName,
+                Designation = designation,
+                OrganizationName = companyName,
+                Address = request.Address?.Trim() ?? string.Empty,
+                MobileNumber = request.MobileNumber.Trim(),
+                EmployeeId = request.EmployeeId?.Trim(),
+                GstNumber = request.GstNumber?.Trim(),
+                Website = request.Website?.Trim(),
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
+                CreatedOn = DateTime.UtcNow,
+                IsDeleted = false
             };
 
             await _recruiterRepository.AddAsync(recruiter);
 
-            // Delete OTP Record
+            // 4. Delete OTP Record
             await _emailVerificationRepository.DeleteAsync(verification);
 
-            // IMPORTANT - Save all changes
+            // 5. Save all changes
             await _unitOfWork.SaveChangesAsync();
 
-            return true;
+            return recruiter.Id;
         }
     }
 }
