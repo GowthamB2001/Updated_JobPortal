@@ -1,4 +1,5 @@
-﻿using JobPortal.WebApi.Models;
+﻿
+using JobPortal.WebApi.Models;
 using System.Net;
 using System.Text.Json;
 
@@ -8,14 +9,12 @@ namespace JobPortal.WebApi.Middleware
     {
         private readonly RequestDelegate _next;
 
-        public ExceptionMiddleware(
-            RequestDelegate next)
+        public ExceptionMiddleware(RequestDelegate next)
         {
             _next = next;
         }
 
-        public async Task InvokeAsync(
-            HttpContext context)
+        public async Task InvokeAsync(HttpContext context)
         {
             try
             {
@@ -23,9 +22,12 @@ namespace JobPortal.WebApi.Middleware
             }
             catch (Exception ex)
             {
-                await HandleExceptionAsync(
-                    context,
-                    ex);
+                // Log complete exception details
+                Console.Error.WriteLine("========== API EXCEPTION ==========");
+                Console.Error.WriteLine(ex.ToString());
+                Console.Error.WriteLine("===================================");
+
+                await HandleExceptionAsync(context, ex);
             }
         }
 
@@ -33,9 +35,7 @@ namespace JobPortal.WebApi.Middleware
             HttpContext context,
             Exception exception)
         {
-            context.Response.ContentType =
-                "application/json";
-
+            context.Response.ContentType = "application/json";
             context.Response.StatusCode =
                 (int)HttpStatusCode.InternalServerError;
 
@@ -51,4 +51,3 @@ namespace JobPortal.WebApi.Middleware
         }
     }
 }
-
