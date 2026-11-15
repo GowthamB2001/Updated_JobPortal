@@ -1,0 +1,28 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build output
+**/bin/
+**/obj/
+
+# Logs
+**/Logs/
+
+# Publish
+publish/
+
+# VS Code
+.vscode/
+
+# Rider
+.idea/
+
+# Windows
+Thumbs.db
+.DS_Store
+
+# User uploaded files
+JobPortal.WebApi/Uploads/Resumes/*
+JobPortal.WebApi/wwwroot/resumes/*
