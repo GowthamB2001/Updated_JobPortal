@@ -115,6 +115,18 @@ namespace JobPortal.WebApi.Controllers
         public async Task<IActionResult> Register(
      [FromForm] RegisterJobSeekerCommand command)
         {
+            // If user is authenticated (e.g. Google login), always use their token ID
+            // so we update the SAME profile instead of creating a duplicate
+            if (!command.JobSeekerId.HasValue || command.JobSeekerId == Guid.Empty)
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                    ?? User.FindFirst("sub")?.Value;
+                if (Guid.TryParse(userIdClaim, out var tokenId))
+                {
+                    command.JobSeekerId = tokenId;
+                }
+            }
+
             var id = await _mediator.Send(command);
 
             return Ok(new

@@ -96,12 +96,47 @@ namespace JobPortal.Application.Features.Dashboard.Queries.GetJobSeekerDashboard
                 savedJobIds = await _unitOfWork.SavedJobs.GetSavedJobIdsAsync(profile.Id);
             }
 
-            // 5. Similar Jobs matching seeker's skills & role (Screenshot 2, 3, 4)
-            var similarJobs = allJobs
-                .Select(j => JobMappingHelper.MapToJobListDto(j, profile, allApplications, savedJobIds))
-                .OrderByDescending(j => j.MatchPercentage)
-                .ThenByDescending(j => j.PostedOn)
-                .ToList();
+            // 5. Similar Jobs — only jobs matching seeker's skills or role
+            List<JobListDto> similarJobs;
+            if (profile != null)
+            {
+                var seekerSkills = (profile.KeySkills ?? "")
+                    .Split(new[] { ',', ';', '/', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(s => s.Trim().ToLower())
+                    .Where(s => !string.IsNullOrWhiteSpace(s))
+                    .ToList();
+
+                var seekerRole = profile.JobRole?.Trim().ToLower() ?? "";
+
+                var matchingJobs = allJobs.Where(j =>
+                {
+                    // Check skill match
+                    var jobSkills = j.JobSkills?
+                        .Select(x => x.SkillName.Trim().ToLower())
+                        .ToList() ?? new List<string>();
+
+                    bool hasSkillMatch = jobSkills.Any(js =>
+                        seekerSkills.Any(ss => js.Contains(ss) || ss.Contains(js)));
+
+                    // Check role/title match
+                    bool hasRoleMatch = !string.IsNullOrWhiteSpace(seekerRole)
+                        && !string.IsNullOrWhiteSpace(j.Title)
+                        && (j.Title.Trim().ToLower().Contains(seekerRole)
+                            || seekerRole.Contains(j.Title.Trim().ToLower()));
+
+                    return hasSkillMatch || hasRoleMatch;
+                }).ToList();
+
+                similarJobs = matchingJobs
+                    .Select(j => JobMappingHelper.MapToJobListDto(j, profile, allApplications, savedJobIds))
+                    .OrderByDescending(j => j.MatchPercentage)
+                    .ThenByDescending(j => j.PostedOn)
+                    .ToList();
+            }
+            else
+            {
+                similarJobs = new List<JobListDto>();
+            }
 
             // 6. Matches Today Summary
             var matchingCount = similarJobs.Count(j => j.MatchPercentage >= 70);

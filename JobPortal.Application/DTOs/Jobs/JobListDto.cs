@@ -27,6 +27,7 @@ namespace JobPortal.Application.DTOs.Jobs
         public string ReplyRate { get; set; } = "92% reply rate";
         public bool IsActivelyHiring { get; set; } = true;
         public bool IsBookmarked { get; set; } = false;
+        public bool IsSaved { get; set; } = false;
 
         // Compensation & Requirements (Screenshots 2, 3, 4)
         public string SalaryRange { get; set; } = string.Empty;

@@ -1,4 +1,4 @@
-﻿using JobPortal.Application.Contracts.Persistence;
+using JobPortal.Application.Contracts.Persistence;
 using JobPortal.Domain.Domain.Entities;
 using JobPortal.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
@@ -28,12 +28,12 @@ namespace JobPortal.Persistence.Repositories
         {
             return await _context.JobSeekerProfiles
                 .FirstOrDefaultAsync(x =>
-                    x.MobileNo == mobileNo);
+                    x.MobileNo == mobileNo && !x.IsDeleted);
         }
         public async Task<JobSeekerProfile?> GetByEmailAsync(string email)
         {
             return await _context.JobSeekerProfiles
-                .FirstOrDefaultAsync(x => x.Email == email);
+                .FirstOrDefaultAsync(x => x.Email == email && !x.IsDeleted);
         }
     }
 }

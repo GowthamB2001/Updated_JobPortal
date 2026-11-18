@@ -104,6 +104,7 @@ namespace JobPortal.Application.Features.Jobs.Common
                 ReplyRate = "92% reply rate",
                 IsActivelyHiring = true,
                 IsBookmarked = savedJobIds != null && savedJobIds.Contains(job.Id),
+                IsSaved = savedJobIds != null && savedJobIds.Contains(job.Id),
 
                 SalaryRange = !string.IsNullOrWhiteSpace(job.SalaryRange)
                     ? job.SalaryRange
