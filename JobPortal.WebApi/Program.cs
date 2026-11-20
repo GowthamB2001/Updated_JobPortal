@@ -298,6 +298,37 @@ try
             ALTER TABLE Jobs ADD MaxSalary DECIMAL(18,2) NULL;
         END
 
+        -- Fix float columns to decimal (prevents System.Double to System.Decimal cast errors)
+        IF EXISTS (SELECT * FROM sys.columns c JOIN sys.types t ON c.system_type_id = t.system_type_id WHERE c.object_id = OBJECT_ID('JobApplications') AND c.name = 'YearsOfExperience' AND t.name = 'float')
+        BEGIN
+            ALTER TABLE JobApplications ALTER COLUMN YearsOfExperience DECIMAL(18,2) NULL;
+        END
+
+        IF EXISTS (SELECT * FROM sys.columns c JOIN sys.types t ON c.system_type_id = t.system_type_id WHERE c.object_id = OBJECT_ID('Jobs') AND c.name = 'MinSalary' AND t.name = 'float')
+        BEGIN
+            ALTER TABLE Jobs ALTER COLUMN MinSalary DECIMAL(18,2) NULL;
+        END
+
+        IF EXISTS (SELECT * FROM sys.columns c JOIN sys.types t ON c.system_type_id = t.system_type_id WHERE c.object_id = OBJECT_ID('Jobs') AND c.name = 'MaxSalary' AND t.name = 'float')
+        BEGIN
+            ALTER TABLE Jobs ALTER COLUMN MaxSalary DECIMAL(18,2) NULL;
+        END
+
+        IF EXISTS (SELECT * FROM sys.columns c JOIN sys.types t ON c.system_type_id = t.system_type_id WHERE c.object_id = OBJECT_ID('JobSeekerProfiles') AND c.name = 'YearsOfExperience' AND t.name = 'float')
+        BEGIN
+            ALTER TABLE JobSeekerProfiles ALTER COLUMN YearsOfExperience DECIMAL(18,2) NULL;
+        END
+
+        IF EXISTS (SELECT * FROM sys.columns c JOIN sys.types t ON c.system_type_id = t.system_type_id WHERE c.object_id = OBJECT_ID('JobSeekerProfiles') AND c.name = 'LastMonthSalary' AND t.name = 'float')
+        BEGIN
+            ALTER TABLE JobSeekerProfiles ALTER COLUMN LastMonthSalary DECIMAL(18,2) NULL;
+        END
+
+        IF EXISTS (SELECT * FROM sys.columns c JOIN sys.types t ON c.system_type_id = t.system_type_id WHERE c.object_id = OBJECT_ID('JobSeekerProfiles') AND c.name = 'LastCompanySalary' AND t.name = 'float')
+        BEGIN
+            ALTER TABLE JobSeekerProfiles ALTER COLUMN LastCompanySalary DECIMAL(18,2) NULL;
+        END
+
         -- Clean up legacy JobApplications foreign key and column if present
         IF EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_JobApplications_JobSeekers_JobSeekerId1')
         BEGIN

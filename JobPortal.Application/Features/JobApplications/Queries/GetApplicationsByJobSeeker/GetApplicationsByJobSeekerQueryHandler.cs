@@ -105,10 +105,15 @@ namespace JobPortal.Application.Features.JobApplications.Queries.GetApplications
                     ? job.CompanyOverview
                     : $"{company} is a global technology leader focused on improving the ways people connect with information and digital solutions.";
 
+                decimal? minSal = null;
+                decimal? maxSal = null;
+                try { if (job?.MinSalary != null) minSal = Convert.ToDecimal(job.MinSalary); } catch { }
+                try { if (job?.MaxSalary != null) maxSal = Convert.ToDecimal(job.MaxSalary); } catch { }
+
                 string salaryRange = !string.IsNullOrWhiteSpace(job?.SalaryRange)
                     ? job.SalaryRange
-                    : (job?.MinSalary.HasValue == true && job?.MaxSalary.HasValue == true
-                        ? $"₹{Convert.ToInt64(job.MinSalary.Value):N0} - ₹{Convert.ToInt64(job.MaxSalary.Value):N0}"
+                    : (minSal.HasValue && maxSal.HasValue
+                        ? $"₹{(long)minSal.Value:N0} - ₹{(long)maxSal.Value:N0}"
                         : "$140k - $160k");
 
                 string aboutRole = !string.IsNullOrWhiteSpace(job?.JobDescription)
@@ -137,8 +142,8 @@ namespace JobPortal.Application.Features.JobApplications.Queries.GetApplications
 
                     // Screenshot 2 & 3: 4 Quick Stat Cards
                     SalaryRange = salaryRange,
-                    MinSalary = job?.MinSalary,
-                    MaxSalary = job?.MaxSalary,
+                    MinSalary = minSal,
+                    MaxSalary = maxSal,
                     Currency = !string.IsNullOrWhiteSpace(job?.Currency) ? job.Currency : "USD",
                     Experience = !string.IsNullOrWhiteSpace(job?.Experience) ? job.Experience : "3-5 Yrs",
                     JobType = job?.JobType.ToString() ?? "Full-time",
