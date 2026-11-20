@@ -73,11 +73,6 @@ namespace JobPortal.Application.Features.Jobs.Common
 
             // Applicants
             int applicantCount = allApplications?.Count(a => a.JobId == job.Id) ?? 0;
-            if (applicantCount == 0)
-            {
-                // Fallback realistic display count if no applications yet
-                applicantCount = (Math.Abs(job.Id.GetHashCode()) % 20) + 5;
-            }
 
             bool hasApplied = profile != null && (allApplications?.Any(a => a.JobId == job.Id && a.JobSeekerId == profile.Id) ?? false);
 

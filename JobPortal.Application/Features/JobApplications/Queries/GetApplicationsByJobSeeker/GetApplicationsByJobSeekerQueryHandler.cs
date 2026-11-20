@@ -95,10 +95,6 @@ namespace JobPortal.Application.Features.JobApplications.Queries.GetApplications
 
                 // 3. Applicant Count
                 int applicantCount = allApps.Count(a => a.JobId == x.JobId);
-                if (applicantCount == 0)
-                {
-                    applicantCount = (Math.Abs(x.JobId.GetHashCode()) % 25) + 18;
-                }
 
                 // 4. Skills & Overview
                 var skills = job?.JobSkills?.Select(s => s.SkillName).ToList() ?? new List<string>();

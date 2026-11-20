@@ -27,22 +27,16 @@ namespace JobPortal.Application.Features.Dashboard.Queries.GetJobSeekerDashboard
             CancellationToken cancellationToken)
         {
             JobSeekerProfile? profile = null;
-            if (request.JobSeekerId.HasValue)
+            if (request.JobSeekerId.HasValue && request.JobSeekerId.Value != Guid.Empty)
             {
                 profile = await _unitOfWork.JobSeekerProfile.GetByIdAsync(request.JobSeekerId.Value);
             }
 
-            if (profile == null)
-            {
-                // Fallback to first profile if available in database
-                var allProfiles = await _unitOfWork.JobSeekerProfile.GetAllAsync();
-                profile = allProfiles.FirstOrDefault();
-            }
-
-            var seekerName = !string.IsNullOrWhiteSpace(profile?.Name) ? profile.Name : "Praveen";
+            var seekerName = !string.IsNullOrWhiteSpace(profile?.Name) ? profile.Name : "Job Seeker";
 
             // 1. Dynamic Greeting based on current time (IST UTC+5:30)
-            var currentHour = DateTime.UtcNow.AddHours(5.5).Hour;
+            var nowUtc = DateTime.UtcNow;
+            var currentHour = nowUtc.AddHours(5.5).Hour;
             var greetingText = currentHour < 12
                 ? "Good morning"
                 : (currentHour < 17 ? "Good afternoon" : "Good evening");
@@ -51,44 +45,45 @@ namespace JobPortal.Application.Features.Dashboard.Queries.GetJobSeekerDashboard
             var allJobs = await _unitOfWork.Jobs.GetAllJobsAsync();
             var allApplications = (await _unitOfWork.JobApplications.GetAllAsync()).ToList();
 
-            // 3. User Applications & Stats (Screenshot 1)
+            // 3. User Applications & Real Stats
             var userApps = profile != null
                 ? allApplications.Where(a => a.JobSeekerId == profile.Id).ToList()
                 : new List<JobApplication>();
 
-            int jobsAppliedCount = userApps.Count > 0 ? userApps.Count : 12;
+            var appliedJobIds = new HashSet<Guid>(userApps.Select(a => a.JobId));
 
-            int postedTodayCount = allJobs.Count(j => j.PostedOn >= DateTime.UtcNow.Date);
-            if (postedTodayCount == 0) postedTodayCount = 47;
+            // Real count: total jobs the seeker has applied to
+            int jobsAppliedCount = userApps.Count;
 
-            int jobsMissedCount = allJobs.Count(j => !j.IsActive || j.ExpiryDate <= DateTime.UtcNow);
-            if (jobsMissedCount == 0) jobsMissedCount = 3;
+            // Real count: active jobs posted today (UTC or IST)
+            var todayUtc = nowUtc.Date;
+            var todayIst = nowUtc.AddHours(5.5).Date;
+            int postedTodayCount = allJobs.Count(j => j.IsActive && !j.IsDeleted && (j.PostedOn.Date == todayUtc || j.PostedOn.Date == todayIst));
 
-            int jobsViewedCount = 156;
+            // Real count: expired or inactive jobs that the seeker did not apply to
+            int jobsMissedCount = allJobs.Count(j => (!j.IsActive || j.ExpiryDate <= nowUtc) && !appliedJobIds.Contains(j.Id));
 
-            // 4. Banner Details: "Jobs Expiring Soon / Live Now" (Screenshot 1)
+            // Real count: user's applications that have been opened/reviewed by recruiters
+            int jobsViewedCount = userApps.Count(a => a.Status >= Domain.Domain.Enums.ApplicationStatus.Viewed);
+
+            // 4. Banner Details: "Jobs Expiring Soon / Live Now" (within next 24 hours)
             var expiringJobs = allJobs
-                .Where(j => j.IsActive && j.ExpiryDate > DateTime.UtcNow && j.ExpiryDate <= DateTime.UtcNow.AddHours(24))
+                .Where(j => j.IsActive && !j.IsDeleted && j.ExpiryDate > nowUtc && j.ExpiryDate <= nowUtc.AddHours(24))
                 .OrderBy(j => j.ExpiryDate)
                 .ToList();
 
-            TimeSpan shortestExpiry;
-            if (expiringJobs.Count > 0)
-            {
-                shortestExpiry = expiringJobs.First().ExpiryDate - DateTime.UtcNow;
-            }
-            else
-            {
-                shortestExpiry = TimeSpan.FromMinutes(59).Add(TimeSpan.FromSeconds(44));
-            }
+            int closingJobsCount = expiringJobs.Count;
+            TimeSpan shortestExpiry = closingJobsCount > 0
+                ? expiringJobs.First().ExpiryDate - nowUtc
+                : TimeSpan.Zero;
 
-            if (shortestExpiry <= TimeSpan.Zero)
+            if (shortestExpiry < TimeSpan.Zero)
             {
-                shortestExpiry = TimeSpan.FromMinutes(59).Add(TimeSpan.FromSeconds(44));
+                shortestExpiry = TimeSpan.Zero;
             }
 
             string remainingTimeStr = $"{(int)shortestExpiry.Hours:D2}:{(int)shortestExpiry.Minutes:D2}:{(int)shortestExpiry.Seconds:D2}";
-            int closingJobsCount = expiringJobs.Count > 0 ? expiringJobs.Count : 24;
+            string subTag = closingJobsCount == 1 ? "🔥 1 Job Closing Soon" : $"🔥 {closingJobsCount} Jobs Closing Soon";
 
             IReadOnlyCollection<Guid>? savedJobIds = null;
             if (profile != null)
@@ -138,9 +133,14 @@ namespace JobPortal.Application.Features.Dashboard.Queries.GetJobSeekerDashboard
                 similarJobs = new List<JobListDto>();
             }
 
-            // 6. Matches Today Summary
-            var matchingCount = similarJobs.Count(j => j.MatchPercentage >= 70);
-            var matchesSummary = $"{Math.Max(1, matchingCount)} job{(matchingCount == 1 ? "" : "s")} matches you today";
+            // 6. Matches Today Summary (Real count)
+            int matchingCount = similarJobs.Count(j => j.MatchPercentage >= 70);
+            string matchesSummary = matchingCount switch
+            {
+                0 => "0 jobs match you today",
+                1 => "1 job matches you today",
+                _ => $"{matchingCount} jobs match you today"
+            };
 
             // 7. Unread Notifications Count
             int unreadNotifications = 0;
@@ -169,11 +169,13 @@ namespace JobPortal.Application.Features.Dashboard.Queries.GetJobSeekerDashboard
                 {
                     Title = "Jobs Expiring Soon",
                     Tag = "LIVE NOW",
-                    SubTag = $"🔥 {closingJobsCount} Jobs Closing Soon",
+                    SubTag = subTag,
                     ClosingJobsCount = closingJobsCount,
                     RemainingTime = remainingTimeStr,
                     RemainingSeconds = shortestExpiry.TotalSeconds,
-                    Description = "Apply before these jobs expire. Don't miss opportunities closing within the next hour.",
+                    Description = closingJobsCount > 0
+                        ? "Apply before these jobs expire. Don't miss opportunities closing soon."
+                        : "No jobs closing within 24 hours. Explore all active opportunities.",
                     ActionText = "Explore Jobs",
                     ActionUrl = "/jobs/expiring"
                 },
