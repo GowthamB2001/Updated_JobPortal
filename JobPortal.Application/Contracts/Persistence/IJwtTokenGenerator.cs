@@ -12,5 +12,6 @@ namespace JobPortal.Application.Contracts.Persistence
         string GenerateToken(Recruiter recruiter);
         string GenerateToken(JobSeekerProfile jobSeeker);
         string GenerateGoogleToken(GoogleLogin googleLogin);
+        string GenerateRefreshToken();
     }
 }

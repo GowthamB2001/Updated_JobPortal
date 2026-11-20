@@ -159,6 +159,8 @@ namespace JobPortal.Application.Features.Auth.Commands.GoogleLogin
 
                 Token = token,
 
+                RefreshToken = _jwtTokenGenerator.GenerateRefreshToken(),
+
                 IsProfileCompleted = profileCompleted
             };
         }

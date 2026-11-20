@@ -67,6 +67,14 @@ namespace JobPortal.Infrastructure.Services
             return GenerateJwt(claims);
         }
 
+        public string GenerateRefreshToken()
+        {
+            var randomNumber = new byte[64];
+            using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+            return Convert.ToBase64String(randomNumber);
+        }
+
         // ===================== Common JWT Generator =====================
         private string GenerateJwt(IEnumerable<Claim> claims)
         {

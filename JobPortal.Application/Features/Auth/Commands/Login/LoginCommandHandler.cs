@@ -42,12 +42,14 @@ namespace JobPortal.Application.Features.Auth.Commands.Login
                 throw new Exception("Invalid Password");
 
             var token = _jwtTokenGenerator.GenerateToken(recruiter);
+            var refreshToken = _jwtTokenGenerator.GenerateRefreshToken();
 
             return new LoginResponse
             {
                 Success = true,
                 Message = "Login Successful",
                 Token = token,
+                RefreshToken = refreshToken,
                 RecruiterId= recruiter.Id,
                 RecruiterName = recruiter.RecruiterName,
                 OfficialEmail = recruiter.OfficialEmail

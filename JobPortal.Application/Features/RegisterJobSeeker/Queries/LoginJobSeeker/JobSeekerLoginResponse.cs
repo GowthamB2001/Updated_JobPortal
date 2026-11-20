@@ -10,6 +10,7 @@ namespace JobPortal.Application.Features.RegisterJobSeeker.Queries.LoginJobSeeke
     public class JobSeekerLoginResponse
     {
         public string Token { get; set; } = string.Empty;
+        public string RefreshToken { get; set; } = string.Empty;
 
         public Guid Id { get; set; }
 

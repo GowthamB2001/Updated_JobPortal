@@ -39,6 +39,7 @@ namespace JobPortal.Application.Features.RegisterJobSeeker.Queries.LoginJobSeeke
             var response = _mapper.Map<JobSeekerLoginResponse>(profile);
 
             response.Token = _jwtTokenGenerator.GenerateToken(profile);
+            response.RefreshToken = _jwtTokenGenerator.GenerateRefreshToken();
 
             return response;
         }
