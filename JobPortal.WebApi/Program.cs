@@ -297,6 +297,17 @@ try
         BEGIN
             ALTER TABLE Jobs ADD MaxSalary DECIMAL(18,2) NULL;
         END
+
+        -- Clean up legacy JobApplications foreign key and column if present
+        IF EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_JobApplications_JobSeekers_JobSeekerId1')
+        BEGIN
+            ALTER TABLE JobApplications DROP CONSTRAINT FK_JobApplications_JobSeekers_JobSeekerId1;
+        END
+
+        IF EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('JobApplications') AND name = 'JobSeekerId1')
+        BEGIN
+            ALTER TABLE JobApplications DROP COLUMN JobSeekerId1;
+        END
     ");
 }
 catch (Exception ex)
