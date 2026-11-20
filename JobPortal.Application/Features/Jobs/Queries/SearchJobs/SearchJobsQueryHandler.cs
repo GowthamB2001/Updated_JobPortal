@@ -30,7 +30,39 @@ namespace JobPortal.Application.Features.Jobs.Queries.SearchJobs
                 request.PageNumber,
                 request.PageSize);
 
-            return jobs.Select(job => new JobSearchDto
+            var filtered = jobs.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(request.Role))
+            {
+                var role = request.Role.Trim().ToLower();
+                filtered = filtered.Where(j => !string.IsNullOrWhiteSpace(j.Title) && (j.Title.ToLower().Contains(role) || role.Contains(j.Title.ToLower())));
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.Experience))
+            {
+                var exp = request.Experience.Trim().ToLower();
+                filtered = filtered.Where(j => !string.IsNullOrWhiteSpace(j.Experience) && (j.Experience.ToLower().Contains(exp) || exp.Contains(j.Experience.ToLower())));
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.WorkMode))
+            {
+                var wm = request.WorkMode.Trim().ToLower();
+                filtered = filtered.Where(j => !string.IsNullOrWhiteSpace(j.WorkMode) && j.WorkMode.ToLower().Contains(wm));
+            }
+
+            if (request.MinSalary.HasValue)
+            {
+                decimal minVal = request.MinSalary.Value <= 100 ? request.MinSalary.Value * 100000m : request.MinSalary.Value;
+                filtered = filtered.Where(j => (j.MaxSalary ?? j.MinSalary ?? 0) >= minVal);
+            }
+
+            if (request.MaxSalary.HasValue && request.MaxSalary.Value < 50)
+            {
+                decimal maxVal = request.MaxSalary.Value <= 100 ? request.MaxSalary.Value * 100000m : request.MaxSalary.Value;
+                filtered = filtered.Where(j => (j.MinSalary ?? 0) <= maxVal);
+            }
+
+            return filtered.Select(job => new JobSearchDto
             {
                 Id = job.Id,
                 Title = job.Title,

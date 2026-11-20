@@ -120,8 +120,13 @@ namespace JobPortal.WebApi.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> SearchJobs(
      [FromQuery] string? keyword,
+     [FromQuery] string? role,
      [FromQuery] string? location,
+     [FromQuery] string? experience,
+     [FromQuery] string? workMode,
      [FromQuery] JobType? jobType,
+     [FromQuery] decimal? minSalary,
+     [FromQuery] decimal? maxSalary,
      [FromQuery] int pageNumber = 1,
      [FromQuery] int pageSize = 10)
         {
@@ -129,8 +134,13 @@ namespace JobPortal.WebApi.Controllers
                 new SearchJobsQuery
                 {
                     Keyword = keyword,
+                    Role = role,
                     Location = location,
+                    Experience = experience,
+                    WorkMode = workMode,
                     JobType = jobType,
+                    MinSalary = minSalary,
+                    MaxSalary = maxSalary,
                     PageNumber = pageNumber,
                     PageSize = pageSize
                 });

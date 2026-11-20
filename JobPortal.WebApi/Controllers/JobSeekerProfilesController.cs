@@ -214,13 +214,32 @@ namespace JobPortal.WebApi.Controllers
             return Ok(result);
         }
         [HttpGet("Fulljoblist")]
-        public async Task<IActionResult> GetAllJobList()
+        public async Task<IActionResult> GetAllJobList(
+            [FromQuery] string? keyword = null,
+            [FromQuery] string? role = null,
+            [FromQuery] string? location = null,
+            [FromQuery] string? experience = null,
+            [FromQuery] string? workMode = null,
+            [FromQuery] string? jobType = null,
+            [FromQuery] decimal? minSalary = null,
+            [FromQuery] decimal? maxSalary = null)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                 ?? User.FindFirst("sub")?.Value;
             Guid? seekerId = Guid.TryParse(userIdClaim, out var id) ? id : null;
 
-            var result = await _mediator.Send(new GetAllJobsQuery { JobSeekerId = seekerId });
+            var result = await _mediator.Send(new GetAllJobsQuery
+            {
+                JobSeekerId = seekerId,
+                Keyword = keyword,
+                Role = role,
+                Location = location,
+                Experience = experience,
+                WorkMode = workMode,
+                JobType = jobType,
+                MinSalary = minSalary,
+                MaxSalary = maxSalary
+            });
 
             return Ok(new
             {
