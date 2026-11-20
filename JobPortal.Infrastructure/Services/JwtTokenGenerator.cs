@@ -1,4 +1,4 @@
-﻿using JobPortal.Application.Contracts.Persistence;
+using JobPortal.Application.Contracts.Persistence;
 using JobPortal.Application.Models;
 using JobPortal.Domain.Domain.Entities;
 using Microsoft.Extensions.Options;

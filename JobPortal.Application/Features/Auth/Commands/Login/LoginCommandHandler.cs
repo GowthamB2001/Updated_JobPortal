@@ -1,4 +1,4 @@
-﻿using JobPortal.Application.Contracts.Persistence;
+using JobPortal.Application.Contracts.Persistence;
 using JobPortal.Application.DTOs.Auth;
 using JobPortal.Domain.Domain.Entities;
 using MediatR;

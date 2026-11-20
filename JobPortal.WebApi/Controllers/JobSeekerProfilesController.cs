@@ -127,14 +127,16 @@ namespace JobPortal.WebApi.Controllers
                 }
             }
 
-            var id = await _mediator.Send(command);
+            var result = await _mediator.Send(command);
 
             return Ok(new
             {
                 Success = true,
                 Message = "Job seeker profile completed successfully.",
-                JobSeekerId = id,
-                IsProfileCompleted = true
+                JobSeekerId = result.JobSeekerId,
+                Token = result.Token,
+                RefreshToken = result.RefreshToken,
+                IsProfileCompleted = result.IsProfileCompleted
             });
         }
 

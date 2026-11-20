@@ -7,20 +7,23 @@ using MediatR;
 namespace JobPortal.Application.Features.RegisterJobSeeker.Command
 {
     public class RegisterJobSeekerCommandHandler
-        : IRequestHandler<RegisterJobSeekerCommand, Guid>
+        : IRequestHandler<RegisterJobSeekerCommand, RegisterJobSeekerResponse>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IFileService _fileService;
+        private readonly IJwtTokenGenerator _jwtTokenGenerator;
 
         public RegisterJobSeekerCommandHandler(
             IUnitOfWork unitOfWork,
-            IFileService fileService)
+            IFileService fileService,
+            IJwtTokenGenerator jwtTokenGenerator)
         {
             _unitOfWork = unitOfWork;
             _fileService = fileService;
+            _jwtTokenGenerator = jwtTokenGenerator;
         }
 
-        public async Task<Guid> Handle(
+        public async Task<RegisterJobSeekerResponse> Handle(
             RegisterJobSeekerCommand request,
             CancellationToken cancellationToken)
         {
@@ -129,8 +132,16 @@ namespace JobPortal.Application.Features.RegisterJobSeeker.Command
 
                 await _unitOfWork.SaveChangesAsync();
 
-                // SAME ID RETURN
-                return profile.Id;
+                var token = _jwtTokenGenerator.GenerateToken(profile);
+                var refreshToken = _jwtTokenGenerator.GenerateRefreshToken();
+
+                return new RegisterJobSeekerResponse
+                {
+                    JobSeekerId = profile.Id,
+                    Token = token,
+                    RefreshToken = refreshToken,
+                    IsProfileCompleted = true
+                };
             }
 
             // =====================================================
@@ -192,7 +203,16 @@ namespace JobPortal.Application.Features.RegisterJobSeeker.Command
 
             await _unitOfWork.SaveChangesAsync();
 
-            return entity.Id;
+            var token = _jwtTokenGenerator.GenerateToken(entity);
+            var refreshToken = _jwtTokenGenerator.GenerateRefreshToken();
+
+            return new RegisterJobSeekerResponse
+            {
+                JobSeekerId = entity.Id,
+                Token = token,
+                RefreshToken = refreshToken,
+                IsProfileCompleted = true
+            };
         }
     }
 }
