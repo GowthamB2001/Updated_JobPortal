@@ -1,4 +1,4 @@
-﻿using JobPortal.Domain.Domain.Enums;
+using JobPortal.Domain.Domain.Enums;
 using MediatR;
 using System;
 using System.Collections.Generic;

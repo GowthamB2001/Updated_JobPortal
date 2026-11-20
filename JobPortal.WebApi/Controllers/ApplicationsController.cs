@@ -3,6 +3,7 @@ using JobPortal.Application.Features.JobApplications.Commands.UpdateApplicationS
 using JobPortal.Application.Features.JobApplications.Queries.GetApplicationById;
 using JobPortal.Application.Features.JobApplications.Queries.GetApplicationsByJob;
 using JobPortal.Application.Features.JobApplications.Queries.GetApplicationsByJobSeeker;
+using JobPortal.Application.Features.JobApplications.Queries.GetApplicationsByRecruiter;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -70,6 +71,31 @@ namespace JobPortal.WebApi.Controllers
             {
                 return Forbid();
             }
+        }
+
+        [Authorize(Roles = "Recruiter,Admin")]
+        [HttpGet("recruiter-applications")]
+        [HttpGet("all-applicants")]
+        public async Task<IActionResult> GetRecruiterApplications([FromQuery] string? status = null)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? User.FindFirst("sub")?.Value;
+
+            if (!Guid.TryParse(userIdClaim, out var recruiterId))
+                return Unauthorized(new { Success = false, Message = "Unauthorized: Invalid or missing recruiter token." });
+
+            var result = await _mediator.Send(new GetApplicationsByRecruiterQuery
+            {
+                RecruiterId = recruiterId,
+                Status = status
+            });
+
+            return Ok(new
+            {
+                Success = true,
+                TotalCount = result.Count,
+                Applications = result
+            });
         }
 
         [Authorize(Roles = "JobSeeker,Admin")]

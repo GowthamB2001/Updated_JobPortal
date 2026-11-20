@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using JobPortal.Application.Contracts.Persistence;
 using MediatR;
 using System;
