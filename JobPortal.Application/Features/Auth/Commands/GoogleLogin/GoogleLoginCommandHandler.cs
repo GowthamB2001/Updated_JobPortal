@@ -159,7 +159,7 @@ namespace JobPortal.Application.Features.Auth.Commands.GoogleLogin
 
                 Token = token,
 
-                RefreshToken = _jwtTokenGenerator.GenerateRefreshToken(),
+                RefreshToken = _jwtTokenGenerator.GenerateRefreshToken(profile.Id, "JobSeeker"),
 
                 IsProfileCompleted = profileCompleted
             };

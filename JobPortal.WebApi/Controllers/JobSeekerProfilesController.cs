@@ -24,6 +24,7 @@ using JobPortal.Application.Features.AppInfo.Queries.GetAppInfo;
 using JobPortal.Application.Features.AppInfo.Queries.GetPrivacyPolicy;
 using JobPortal.Application.Features.AppInfo.Queries.GetTermsAndConditions;
 using JobPortal.Application.Features.JobApplications.Queries.GetApplicationsByJobSeeker;
+using JobPortal.Application.Features.Auth.Commands.RefreshToken;
 
 namespace JobPortal.WebApi.Controllers
 {
@@ -190,6 +191,14 @@ namespace JobPortal.WebApi.Controllers
                 Success = true,
                 User = result
             });
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
+        {
+            var result = await _mediator.Send(command);
+
+            return Ok(result);
         }
         [HttpGet("JobsList")]
         public async Task<IActionResult> GetAllJobs()

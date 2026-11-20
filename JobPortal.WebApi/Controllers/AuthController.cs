@@ -7,6 +7,7 @@ using JobPortal.Application.Features.Auth.Commands.VerifyEmail;
 using JobPortal.Application.Features.Auth.Commands.ForgotPassword;
 using JobPortal.Application.Features.Auth.Commands.VerifyResetOtp;
 using JobPortal.Application.Features.Auth.Commands.ResetPassword;
+using JobPortal.Application.Features.Auth.Commands.RefreshToken;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -89,6 +90,14 @@ namespace JobPortal.WebApi.Controllers
 
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
+        {
+            var result = await _mediator.Send(command);
+
+            return Ok(result);
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
         {
             var result = await _mediator.Send(command);
 

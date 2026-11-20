@@ -8,6 +8,8 @@ namespace JobPortal.Application.DTOs.Auth
 {
     public class RefreshTokenRequestDto
     {
-        public string RefreshToken { get; set; }
+        public string RefreshToken { get; set; } = string.Empty;
+
+        public string? Token { get; set; }
     }
 }

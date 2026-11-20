@@ -67,12 +67,73 @@ namespace JobPortal.Infrastructure.Services
             return GenerateJwt(claims);
         }
 
+        public string GenerateRefreshToken(Guid userId, string role)
+        {
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+                new Claim(ClaimTypes.Role, role),
+                new Claim("token_type", "refresh"),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            var key = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(_jwtSettings.Key));
+
+            var credentials = new SigningCredentials(
+                key,
+                SecurityAlgorithms.HmacSha256);
+
+            // Refresh token is valid for 30 days
+            var token = new JwtSecurityToken(
+                issuer: _jwtSettings.Issuer,
+                audience: _jwtSettings.Audience,
+                claims: claims,
+                expires: DateTime.UtcNow.AddDays(30),
+                signingCredentials: credentials);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
         public string GenerateRefreshToken()
         {
-            var randomNumber = new byte[64];
-            using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
-            rng.GetBytes(randomNumber);
-            return Convert.ToBase64String(randomNumber);
+            return GenerateRefreshToken(Guid.Empty, "User");
+        }
+
+        public ClaimsPrincipal? GetPrincipalFromToken(string token, bool validateLifetime = true)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+                return null;
+
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = validateLifetime,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = _jwtSettings.Issuer,
+                ValidAudience = _jwtSettings.Audience,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key)),
+                ClockSkew = TimeSpan.Zero
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            try
+            {
+                var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
+                if (securityToken is not JwtSecurityToken jwtSecurityToken ||
+                    !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return null;
+                }
+
+                return principal;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         // ===================== Common JWT Generator =====================

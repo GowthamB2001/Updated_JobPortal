@@ -133,7 +133,7 @@ namespace JobPortal.Application.Features.RegisterJobSeeker.Command
                 await _unitOfWork.SaveChangesAsync();
 
                 var token = _jwtTokenGenerator.GenerateToken(profile);
-                var refreshToken = _jwtTokenGenerator.GenerateRefreshToken();
+                var refreshToken = _jwtTokenGenerator.GenerateRefreshToken(profile.Id, "JobSeeker");
 
                 return new RegisterJobSeekerResponse
                 {
@@ -204,7 +204,7 @@ namespace JobPortal.Application.Features.RegisterJobSeeker.Command
             await _unitOfWork.SaveChangesAsync();
 
             var token = _jwtTokenGenerator.GenerateToken(entity);
-            var refreshToken = _jwtTokenGenerator.GenerateRefreshToken();
+            var refreshToken = _jwtTokenGenerator.GenerateRefreshToken(entity.Id, "JobSeeker");
 
             return new RegisterJobSeekerResponse
             {
