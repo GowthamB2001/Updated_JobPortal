@@ -25,6 +25,7 @@ using JobPortal.Application.Features.AppInfo.Queries.GetPrivacyPolicy;
 using JobPortal.Application.Features.AppInfo.Queries.GetTermsAndConditions;
 using JobPortal.Application.Features.JobApplications.Queries.GetApplicationsByJobSeeker;
 using JobPortal.Application.Features.Auth.Commands.RefreshToken;
+using JobPortal.Application.Features.Jobs.Queries.GetFilterPreferences;
 
 namespace JobPortal.WebApi.Controllers
 {
@@ -225,6 +226,19 @@ namespace JobPortal.WebApi.Controllers
             {
                 Success = true,
                 Jobs = result
+            });
+        }
+
+        [HttpGet("filterpreferancedata")]
+        [HttpGet("filter-preferences")]
+        public async Task<IActionResult> GetFilterPreferences()
+        {
+            var result = await _mediator.Send(new GetFilterPreferencesQuery());
+
+            return Ok(new
+            {
+                Success = true,
+                Data = result
             });
         }
 

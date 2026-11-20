@@ -12,6 +12,7 @@ using JobPortal.Domain.Domain.Enums;
 using JobPortal.Application.Features.Jobs.Queries.GetJobsByRecruiter;
 using System.Security.Claims;
 using JobPortal.Application.Features.Jobs.Commands.RenewJob;
+using JobPortal.Application.Features.Jobs.Queries.GetFilterPreferences;
 
 namespace JobPortal.WebApi.Controllers
 {
@@ -136,6 +137,21 @@ namespace JobPortal.WebApi.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("filterpreferancedata")]
+        [HttpGet("filter-preferences")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetFilterPreferences()
+        {
+            var result = await _mediator.Send(new GetFilterPreferencesQuery());
+
+            return Ok(new
+            {
+                Success = true,
+                Data = result
+            });
+        }
+
         [HttpGet("my-jobs")]
         public async Task<IActionResult> GetMyJobs()
         {
