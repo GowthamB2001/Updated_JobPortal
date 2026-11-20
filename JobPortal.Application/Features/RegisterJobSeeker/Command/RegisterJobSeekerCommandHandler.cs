@@ -132,14 +132,14 @@ namespace JobPortal.Application.Features.RegisterJobSeeker.Command
 
                 await _unitOfWork.SaveChangesAsync();
 
-                var token = _jwtTokenGenerator.GenerateToken(profile);
-                var refreshToken = _jwtTokenGenerator.GenerateRefreshToken(profile.Id, "JobSeeker");
+                var googleToken = _jwtTokenGenerator.GenerateToken(profile);
+                var googleRefreshToken = _jwtTokenGenerator.GenerateRefreshToken(profile.Id, "JobSeeker");
 
                 return new RegisterJobSeekerResponse
                 {
                     JobSeekerId = profile.Id,
-                    Token = token,
-                    RefreshToken = refreshToken,
+                    Token = googleToken,
+                    RefreshToken = googleRefreshToken,
                     IsProfileCompleted = true
                 };
             }
