@@ -52,6 +52,11 @@ namespace JobPortal.Application.Features.Jobs.Queries.GetJobsByRecruiter
 
         public string Status { get; set; } = string.Empty;
 
+        public int ApplicantCount { get; set; }
+        public int AppliedCandidateCount { get; set; }
+        public int AppliedCount { get; set; }
+        public string ApplicantCountText { get; set; } = string.Empty;
+
         public List<string> Skills { get; set; } = new();
     }
 }
