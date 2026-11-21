@@ -1,4 +1,4 @@
-﻿using JobPortal.Application.Contracts.Persistence;
+using JobPortal.Application.Contracts.Persistence;
 using JobPortal.Domain.Domain.Entities;
 using MediatR;
 using System;
@@ -24,6 +24,20 @@ namespace JobPortal.Application.Features.JobRenewals.Commands.RenewJob
             RenewJobCommand request,
             CancellationToken cancellationToken)
         {
+            // 1. Update the actual Job's expiry date and reactivate it
+            var job = await _unitOfWork.Jobs.GetByIdAsync(request.JobId);
+            if (job == null)
+                throw new Exception("Job not found.");
+
+            job.PostedOn = DateTime.UtcNow;
+            job.ExpiryDate = DateTime.UtcNow.AddDays(request.RenewalDays);
+            job.RepostCount++;
+            job.IsActive = true;
+            job.ModifiedOn = DateTime.UtcNow;
+
+            await _unitOfWork.Jobs.UpdateAsync(job);
+
+            // 2. Track the renewal record
             var existingRenewal =
                 await _unitOfWork.JobRenewals
                     .GetByJobIdAsync(request.JobId);
@@ -49,8 +63,7 @@ namespace JobPortal.Application.Features.JobRenewals.Commands.RenewJob
 
             existingRenewal.RenewalDays = request.RenewalDays;
             existingRenewal.RenewalEndDate =
-                existingRenewal.RenewalEndDate.AddDays(request.RenewalDays);
-
+                DateTime.UtcNow.AddDays(request.RenewalDays);
             existingRenewal.RenewedCount++;
 
             await _unitOfWork.JobRenewals
