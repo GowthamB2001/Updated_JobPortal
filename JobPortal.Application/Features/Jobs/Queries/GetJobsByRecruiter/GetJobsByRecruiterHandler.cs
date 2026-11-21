@@ -1,4 +1,4 @@
-﻿using JobPortal.Application.Contracts.Persistence;
+using JobPortal.Application.Contracts.Persistence;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -43,7 +43,7 @@ namespace JobPortal.Application.Features.Jobs.Queries.GetJobsByRecruiter
                 {
                     Id = job.Id,
                     RecruiterId = job.RecruiterId,
-                    RecruiterType = job.Recruiter?.OrganizationType,
+                    RecruiterType = job.Recruiter?.OrganizationType?.ToString(),
                     Title = job.Title,
                     Company = job.Company,
                     Location = job.Location,
