@@ -43,7 +43,7 @@ namespace JobPortal.Application.Features.Jobs.Queries.GetJobsByRecruiter
                 {
                     Id = job.Id,
                     RecruiterId = job.RecruiterId,
-                    RecruiterType = job.Recruiter?.OrganizationType?.ToString(),
+                    RecruiterType = job.Recruiter != null ? job.Recruiter.OrganizationType.ToString() : null,
                     Title = job.Title,
                     Company = job.Company,
                     Location = job.Location,
